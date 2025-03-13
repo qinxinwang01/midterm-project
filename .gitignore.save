@@ -1,0 +1,72 @@
+
+6# 忽略 macOS 系统文件
+.DS_Store
+.CFUserTextEncoding
+.npm/
+.zprofile
+.zsh_history
+.zsh_sessions/
+Library/
+Movies/
+Music/
+Pictures/
+Public/
+Creative Cloud Files/
+Desktop/
+
+# 忽略项目依赖
+node_modules/
+
+# 忽略 IDE 配置文件
+.vscode/
+.idea/
+
+# 忽略 Expo 缓存
+.expo/
+.expo-shared/
+
+# 忽略构建输出
+build/
+dist/
+web-build/
+
+# 忽略环境变量文件
+.env
+
+
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
