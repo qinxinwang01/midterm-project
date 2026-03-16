@@ -1,7 +1,16 @@
 import { menuItems } from '../data/menuData'
 
-export default function FavoritesPanel({ favorites, onToggleFavorite }) {
+export default function FavoritesPanel({ favorites, user, onToggleFavorite }) {
   const favoriteDishes = menuItems.filter((item) => favorites.includes(item.id))
+
+  if (!user) {
+    return (
+      <div className="favorites-panel">
+        <h2 className="favorites-title">My Favorites</h2>
+        <p className="favorites-empty">Log in to save your favorite dishes!</p>
+      </div>
+    )
+  }
 
   if (favoriteDishes.length === 0) {
     return (
