@@ -1,0 +1,1463 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.76
+           Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    ~/midterm-project
+
+  ✻ Voice mode is now available · /voice to enable
+
+❯ I am building a midterm project called QuickBite using React (Vite).          
+                                                                                
+QuickBite is a restaurant menu discovery web app where users can browse dishes  
+and explore restaurant menus.                                                   
+                                                                                
+My planned features are:                                                        
+1. Browse restaurant menu items                                                 
+2. Search dishes by name                                                        
+3. Filter menu by category                                                      
+4. Save favorite dishes                                                         
+5. Responsive mobile layout                                                     
+                                                                                
+This is a student midterm project, so I want to keep the architecture simple.   
+                                                                                
+Please help me:                                                                 
+1. Suggest a clean React component structure                                    
+2. Suggest how menu data should be stored                                       
+3. Explain the development order for implementing these features                
+
+⏺ Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Here's a clean plan for your QuickBite project:
+
+  ---
+  1. Component Structure
+
+  src/
+  ├── data/
+  │   └── menuData.js          # Static menu data
+  ├── components/
+  │   ├── Header.jsx            # App title + search bar
+  │   ├── CategoryFilter.jsx    # Filter buttons (All, Pizza, Sushi, etc.)
+  │   ├── MenuGrid.jsx          # Grid layout wrapper
+  │   ├── MenuCard.jsx          # Single dish card (name, price, image, heart
+  icon)
+  │   └── FavoritesPanel.jsx    # List of saved favorites
+  └── App.jsx                   # State lives here, wires everything together
+
+  Keep all state in App.jsx — no need for Context or Redux at this scale.
+
+  ---
+  2. Menu Data Storage
+
+  Use a plain JS array in src/data/menuData.js:
+
+  export const menuItems = [
+    {
+      id: 1,
+      name: "Margherita Pizza",
+      category: "Pizza",
+      price: 12.99,
+      description: "Classic tomato and mozzarella",
+      image: "https://..."
+    },
+    // ...more items
+  ];
+
+  Favorites → store as an array of IDs in localStorage:
+  const [favorites, setFavorites] = useState(
+    () => JSON.parse(localStorage.getItem("favorites")) || []
+  );
+
+  This keeps it simple — no database, no backend needed.
+
+  ---
+  3. Development Order
+
+  Build features in this order so each step is testable and builds on the
+  previous:
+
+  ┌──────┬───────────────────────────────┬──────────────────────────────────┐
+  │ Step │            Feature            │          Why this order          │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 1    │ Add menuData.js + render all  │ Foundation — everything else     │
+  │      │ items in App.jsx              │ needs this data                  │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 2    │ Extract MenuCard + MenuGrid   │ Clean up App.jsx before adding   │
+  │      │ components                    │ logic                            │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 3    │ Add CategoryFilter + filter   │ State + filtering is easiest     │
+  │      │ logic in App.jsx              │ after cards work                 │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 4    │ Add Header with search bar +  │ Search is just another filter on │
+  │      │ search logic                  │  the same list                   │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 5    │ Add favorites with            │ Add heart button to MenuCard,    │
+  │      │ localStorage                  │ FavoritesPanel last              │
+  ├──────┼───────────────────────────────┼──────────────────────────────────┤
+  │ 6    │ CSS responsive layout         │ Polish after all features work   │
+  └──────┴───────────────────────────────┴──────────────────────────────────┘
+
+  Key tip: Steps 3 and 4 both filter menuItems. You can combine them with one
+  useMemo or filter() that checks both searchQuery and activeCategory at the
+  same time.
+
+  ---
+  Want me to scaffold any of these files to get you started?
+
+❯ Let's start with Step 1.                                                      
+                                                                                
+Please generate a menuData.js file for my QuickBite app.                        
+                                                                                
+Requirements:                                                                   
+- 10 sample dishes                                                              
+- include id, name, category, price, description, and image                     
+- categories like Pizza, Sushi, Fast Food, Salad, Mexican                       
+                                                                                
+Keep the data simple and export it so it can be imported into App.jsx.          
+
+⏺ Bash(mkdir -p /Users/tinawang/midterm-project/src/data)
+  ⎿  Done
+
+⏺ Write(src/data/menuData.js)
+  ⎿  Wrote 82 lines to src/data/menuData.js
+       1 export const menuItems = [
+       2   {
+       3     id: 1,
+       4     name: "Margherita Pizza",
+       5     category: "Pizza",
+       6     price: 12.99,
+       7     description: "Classic tomato sauce with fresh mozzarella and
+          basil.",
+       8     image: "https://images.unsplash.com/photo-1604068549290-dea0
+         e4a305ca?w=400"
+       9   },
+      10   {
+     … +72 lines (ctrl+o to expand)
+
+⏺ File created at src/data/menuData.js — 10 dishes across all 5 categories (2
+  each).
+
+  Images are from Unsplash (free, no API key needed). To use it in App.jsx:
+
+  import { menuItems } from './data/menuData';
+
+  Then render them with something like:
+
+  {menuItems.map(item => (
+    <div key={item.id}>
+      <img src={item.image} alt={item.name} />
+      <h3>{item.name}</h3>
+      <p>{item.category} — ${item.price}</p>
+      <p>{item.description}</p>
+    </div>
+  ))}
+
+  Ready for Step 2 whenever you are — extracting MenuCard and MenuGrid
+  components.
+
+❯ Now help me implement Step 1: displaying menu items.                          
+                                                                                
+Use the existing src/data/menuData.js file and render all menu items in App.jsx 
+ as simple cards.                                                               
+                                                                                
+Each card should display:                                                       
+- image                                                                         
+- dish name                                                                     
+- category                                                                      
+- price                                                                         
+- description                                                                   
+                                                                                
+Keep the code simple for now. We will refactor into components later.           
+Please update App.jsx and any CSS if needed.                                    
+
+⏺ Read 2 files (ctrl+o to expand)
+
+⏺ I'll replace the placeholder content with a menu grid powered by menuData.js,
+  keeping the existing navbar/footer and CSS variables.
+
+⏺ Update(src/App.jsx)
+  ⎿  Added 17 lines, removed 200 lines
+        1  import './App.css'
+        2 +import { menuItems } from './data/menuData'                   
+        3  
+        3 -const featuredRestaurants = [                                 
+        4 -  {                                                           
+        5 -    id: 1,                                                    
+        6 -    name: "The Spice Garden",                                 
+        7 -    cuisine: "Indian",                                        
+        8 -    rating: 4.8,                                              
+        9 -    deliveryTime: "25-35 min",                                
+       10 -    priceRange: "$$",                                         
+       11 -    tag: "Popular",                                           
+       12 -  },                                                          
+       13 -  {                                                           
+       14 -    id: 2,                                                    
+       15 -    name: "Sakura Sushi",                                     
+       16 -    cuisine: "Japanese",                                      
+       17 -    rating: 4.6,                                              
+       18 -    deliveryTime: "20-30 min",                                
+       19 -    priceRange: "$$$",                                        
+       20 -    tag: "New",                                               
+       21 -  },                                                          
+       22 -  {                                                           
+       23 -    id: 3,                                                    
+       24 -    name: "Bella Italia",                                     
+       25 -    cuisine: "Italian",                                       
+       26 -    rating: 4.7,                                              
+       27 -    deliveryTime: "30-40 min",                                
+       28 -    priceRange: "$$",                                         
+       29 -    tag: "Top Rated",                                         
+       30 -  },                                                          
+       31 -]                                                             
+       32 -                                                              
+       33 -const featuredDishes = [                                      
+       34 -  { id: 1, name: "Butter Chicken", restaurant: "The Spice Gard
+          -en", price: "$14.99", category: "Main" },                     
+       35 -  { id: 2, name: "Salmon Sashimi", restaurant: "Sakura Sushi",
+          - price: "$18.99", category: "Appetizer" },                    
+       36 -  { id: 3, name: "Margherita Pizza", restaurant: "Bella Italia
+          -", price: "$13.99", category: "Main" },                       
+       37 -  { id: 4, name: "Mango Lassi", restaurant: "The Spice Garden"
+          -, price: "$4.99", category: "Drink" },                        
+       38 -  { id: 5, name: "Tiramisu", restaurant: "Bella Italia", price
+          -: "$7.99", category: "Dessert" },                             
+       39 -  { id: 6, name: "Dragon Roll", restaurant: "Sakura Sushi", pr
+          -ice: "$15.99", category: "Main" },                            
+       40 -]                                                             
+       41 -                                                              
+       42 -const features = [                                            
+       43 -  {                                                           
+       44 -    icon: "search",                                           
+       45 -    title: "Discover Menus",                                  
+       46 -    description: "Browse full menus from hundreds of local res
+          -taurants before you order.",                                  
+       47 -  },                                                          
+       48 -  {                                                           
+       49 -    icon: "filter",                                           
+       50 -    title: "Filter by Taste",                                 
+       51 -    description: "Find exactly what you're craving — filter by
+          - cuisine, price, dietary needs, and more.",                   
+       52 -  },                                                          
+       53 -  {                                                           
+       54 -    icon: "star",                                             
+       55 -    title: "Ratings & Reviews",                               
+       56 -    description: "Real reviews from real diners help you choos
+          -e with confidence every time.",                               
+       57 -  },                                                          
+       58 -]                                                             
+       59 -                                                              
+       60 -function SearchIcon() {                                       
+       61 -  return (                                                    
+       62 -    <svg xmlns="http://www.w3.org/2000/svg" width="28" height=
+          -"28" viewBox="0 0 24 24" fill="none" stroke="currentColor" str
+          -okeWidth="2" strokeLinecap="round" strokeLinejoin="round">    
+       63 -      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2
+          -="16.65" y2="16.65" />                                        
+       64 -    </svg>                                                    
+       65 -  )                                                           
+       66 -}                                                             
+       67 -                                                              
+       68 -function FilterIcon() {                                       
+       69 -  return (                                                    
+       70 -    <svg xmlns="http://www.w3.org/2000/svg" width="28" height=
+          -"28" viewBox="0 0 24 24" fill="none" stroke="currentColor" str
+          -okeWidth="2" strokeLinecap="round" strokeLinejoin="round">    
+       71 -      <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12
+          -" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />  
+       72 -    </svg>                                                    
+       73 -  )                                                           
+       74 -}                                                             
+       75 -                                                              
+       76 -function StarIcon() {                                         
+       77 -  return (                                                    
+       78 -    <svg xmlns="http://www.w3.org/2000/svg" width="28" height=
+          -"28" viewBox="0 0 24 24" fill="none" stroke="currentColor" str
+          -okeWidth="2" strokeLinecap="round" strokeLinejoin="round">    
+       79 -      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 
+          -21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />   
+       80 -    </svg>                                                    
+       81 -  )                                                           
+       82 -}                                                             
+       83 -                                                              
+       84 -const iconMap = { search: SearchIcon, filter: FilterIcon, star
+          -: StarIcon }                                                  
+       85 -                                                              
+       86 -function FeatureCard({ icon, title, description }) {          
+       87 -  const Icon = iconMap[icon]                                  
+       88 -  return (                                                    
+       89 -    <div className="feature-card">                            
+       90 -      <div className="feature-icon"><Icon /></div>            
+       91 -      <h3>{title}</h3>                                        
+       92 -      <p>{description}</p>                                    
+       93 -    </div>                                                    
+       94 -  )                                                           
+       95 -}                                                             
+       96 -                                                              
+       97 -function RestaurantCard({ name, cuisine, rating, deliveryTime,
+          - priceRange, tag }) {                                         
+       98 -  return (                                                    
+       99 -    <div className="restaurant-card">                         
+      100 -      {tag && <span className="restaurant-tag">{tag}</span>}  
+      101 -      <div className="restaurant-avatar">{name[0]}</div>      
+      102 -      <h3>{name}</h3>                                         
+      103 -      <p className="cuisine">{cuisine} · {priceRange}</p>     
+      104 -      <div className="restaurant-meta">                       
+      105 -        <span className="rating">&#9733; {rating}</span>      
+      106 -        <span className="delivery-time">{deliveryTime}</span> 
+      107 -      </div>                                                  
+      108 -    </div>                                                    
+      109 -  )                                                           
+      110 -}                                                             
+      111 -                                                              
+      112 -function DishCard({ name, restaurant, price, category }) {    
+      113 -  return (                                                    
+      114 -    <div className="dish-card">                               
+      115 -      <div className="dish-category">{category}</div>         
+      116 -      <h4>{name}</h4>                                         
+      117 -      <div className="dish-footer">                           
+      118 -        <span className="dish-restaurant">{restaurant}</span> 
+      119 -        <span className="dish-price">{price}</span>           
+      120 -      </div>                                                  
+      121 -    </div>                                                    
+      122 -  )                                                           
+      123 -}                                                             
+      124 -                                                              
+        4  export default function App() {
+        5    return (
+        6      <div className="app">
+     ...
+       10            <span className="logo-icon">QB</span>
+       11            <span className="logo-text">QuickBite</span>
+       12          </div>
+      134 -        <div className="nav-links">                           
+      135 -          <a href="#features">Features</a>                    
+      136 -          <a href="#restaurants">Restaurants</a>              
+      137 -          <a href="#dishes">Dishes</a>                        
+      138 -        </div>                                                
+      139 -        <button className="nav-cta">Get Started</button>      
+       13        </nav>
+       14  
+      142 -      {/* Hero */}                                            
+      143 -      <section className="hero">                              
+      144 -        <div className="hero-content">                        
+      145 -          <span className="hero-badge">Restaurant Menu Discove
+          -ry</span>                                                     
+      146 -          <h1>Find Your Next <span className="highlight">Favor
+          -ite Dish</span></h1>                                          
+      147 -          <p className="hero-subtitle">                       
+      148 -            Browse full menus, discover new restaurants, and e
+          -xplore cuisines from around the world — all in one place.     
+      149 -          </p>                                                
+      150 -          <div className="hero-actions">                      
+      151 -            <button className="btn-primary">Explore Menus</but
+          -ton>                                                          
+      152 -            <button className="btn-secondary">Browse Restauran
+          -ts</button>                                                   
+      153 -          </div>                                              
+      154 -          <div className="hero-stats">                        
+      155 -            <div className="stat">                            
+      156 -              <strong>500+</strong>                           
+      157 -              <span>Restaurants</span>                        
+      158 -            </div>                                            
+      159 -            <div className="stat-divider" />                  
+      160 -            <div className="stat">                            
+      161 -              <strong>10k+</strong>                           
+      162 -              <span>Menu Items</span>                         
+      163 -            </div>                                            
+      164 -            <div className="stat-divider" />                  
+      165 -            <div className="stat">                            
+      166 -              <strong>4.9</strong>                            
+      167 -              <span>Avg Rating</span>                         
+      168 -            </div>                                            
+      169 -          </div>                                              
+      170 -        </div>                                                
+      171 -      </section>                                              
+      172 -                                                              
+      173 -      {/* Features */}                                        
+      174 -      <section className="section" id="features">             
+       15 +      {/* Menu Section */}                                    
+       16 +      <main className="section">                              
+       17          <div className="section-header">
+      176 -          <h2>Why QuickBite?</h2>                             
+      177 -          <p>Everything you need to make smarter dining decisi
+          -ons.</p>                                                      
+       18 +          <h2>Browse the Menu</h2>                            
+       19 +          <p>{menuItems.length} dishes available</p>          
+       20          </div>
+      179 -        <div className="features-grid">                       
+      180 -          {features.map((f) => (                              
+      181 -            <FeatureCard key={f.icon} {...f} />               
+      182 -          ))}                                                 
+      183 -        </div>                                                
+      184 -      </section>                                              
+       21  
+      186 -      {/* Featured Restaurants */}                            
+      187 -      <section className="section section-alt" id="restaurants
+          -">                                                            
+      188 -        <div className="section-header">                      
+      189 -          <h2>Featured Restaurants</h2>                       
+      190 -          <p>Handpicked places loved by our community.</p>    
+      191 -        </div>                                                
+      192 -        <div className="restaurants-grid">                    
+      193 -          {featuredRestaurants.map((r) => (                   
+      194 -            <RestaurantCard key={r.id} {...r} />              
+       22 +        <div className="menu-grid">                           
+       23 +          {menuItems.map((item) => (                          
+       24 +            <div key={item.id} className="menu-card">         
+       25 +              <img src={item.image} alt={item.name} className=
+          +"menu-card-img" />                                            
+       26 +              <div className="menu-card-body">                
+       27 +                <span className="menu-card-category">{item.cat
+          +egory}</span>                                                 
+       28 +                <h3 className="menu-card-name">{item.name}</h3
+          +>                                                             
+       29 +                <p className="menu-card-description">{item.des
+          +cription}</p>                                                 
+       30 +                <p className="menu-card-price">${item.price.to
+          +Fixed(2)}</p>                                                 
+       31 +              </div>                                          
+       32 +            </div>                                            
+       33            ))}
+       34          </div>
+      197 -      </section>                                              
+       35 +      </main>                                                 
+       36  
+      199 -      {/* Trending Dishes */}                                 
+      200 -      <section className="section" id="dishes">               
+      201 -        <div className="section-header">                      
+      202 -          <h2>Trending Dishes</h2>                            
+      203 -          <p>What everyone is ordering right now.</p>         
+      204 -        </div>                                                
+      205 -        <div className="dishes-grid">                         
+      206 -          {featuredDishes.map((d) => (                        
+      207 -            <DishCard key={d.id} {...d} />                    
+      208 -          ))}                                                 
+      209 -        </div>                                                
+      210 -      </section>                                              
+      211 -                                                              
+      212 -      {/* CTA Banner */}                                      
+      213 -      <section className="cta-banner">                        
+      214 -        <h2>Ready to explore?</h2>                            
+      215 -        <p>Join thousands of food lovers discovering their nex
+          -t favorite meal.</p>                                          
+      216 -        <button className="btn-primary btn-large">Start Browsi
+          -ng — It&apos;s Free</button>                                  
+      217 -      </section>                                              
+      218 -                                                              
+       37        {/* Footer */}
+       38        <footer className="footer">
+       39          <div className="footer-logo">
+       40            <span className="logo-icon">QB</span>
+       41            <span className="logo-text">QuickBite</span>
+       42          </div>
+      225 -        <p className="footer-tagline">Discover menus. Explore 
+          -flavors. Eat well.</p>                                        
+       43          <p className="footer-copy">&copy; {new Date().getFullY
+           ear()} QuickBite. All rights reserved.</p>
+       44        </footer>
+       45      </div>
+
+⏺ Now add the menu card styles to App.css:
+
+⏺ Update(src/App.css)
+  ⎿  Added 63 lines
+      487    color: #555;
+      488  }
+      489  
+      490 +/* ── Menu grid ── */                                         
+      491 +.menu-grid {                                                  
+      492 +  display: grid;                                              
+      493 +  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))
+          +;                                                             
+      494 +  gap: 1.5rem;                                                
+      495 +}                                                             
+      496 +                                                              
+      497 +.menu-card {                                                  
+      498 +  background: #fff;                                           
+      499 +  border: 1px solid #f0f0f0;                                  
+      500 +  border-radius: 16px;                                        
+      501 +  overflow: hidden;                                           
+      502 +  transition: box-shadow 0.2s, transform 0.2s;                
+      503 +}                                                             
+      504 +                                                              
+      505 +.menu-card:hover {                                            
+      506 +  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);                 
+      507 +  transform: translateY(-4px);                                
+      508 +}                                                             
+      509 +                                                              
+      510 +.menu-card-img {                                              
+      511 +  width: 100%;                                                
+      512 +  height: 180px;                                              
+      513 +  object-fit: cover;                                          
+      514 +}                                                             
+      515 +                                                              
+      516 +.menu-card-body {                                             
+      517 +  padding: 1rem 1.25rem 1.25rem;                              
+      518 +}                                                             
+      519 +                                                              
+      520 +.menu-card-category {                                         
+      521 +  display: inline-block;                                      
+      522 +  font-size: 0.72rem;                                         
+      523 +  font-weight: 600;                                           
+      524 +  color: #ff6b35;                                             
+      525 +  background: #fff0e8;                                        
+      526 +  padding: 0.15rem 0.55rem;                                   
+      527 +  border-radius: 999px;                                       
+      528 +  text-transform: uppercase;                                  
+      529 +  letter-spacing: 0.4px;                                      
+      530 +  margin-bottom: 0.5rem;                                      
+      531 +}                                                             
+      532 +                                                              
+      533 +.menu-card-name {                                             
+      534 +  font-size: 1.05rem;                                         
+      535 +  font-weight: 700;                                           
+      536 +  color: #1a1a2e;                                             
+      537 +  margin-bottom: 0.4rem;                                      
+      538 +}                                                             
+      539 +                                                              
+      540 +.menu-card-description {                                      
+      541 +  font-size: 0.88rem;                                         
+      542 +  color: #666;                                                
+      543 +  line-height: 1.5;                                           
+      544 +  margin-bottom: 0.75rem;                                     
+      545 +}                                                             
+      546 +                                                              
+      547 +.menu-card-price {                                            
+      548 +  font-size: 1.1rem;                                          
+      549 +  font-weight: 700;                                           
+      550 +  color: #ff6b35;                                             
+      551 +}                                                             
+      552 +                                                              
+      553  /* ── Responsive ── */
+      554  @media (max-width: 640px) {
+      555    .nav-links {
+
+⏺ Now let me run the dev server:
+
+⏺ Bash(npm run dev 2>&1 &)
+  ⎿  Running in the background (↓ to manage)
+
+⏺ Bash(sleep 3 && cat /private/tmp/claude-501/-Users-tinawang-midterm-project/ta
+      sks/bs23vg3xk.output)
+  ⎿  > midterm-project@0.0.0 dev
+     > vite
+     … +5 lines (ctrl+o to expand)
+
+⏺ Dev server is running at http://localhost:5173. Here's what changed:
+
+  - App.jsx — stripped down to just the navbar, a menu grid rendering all 10
+  items from menuData.js, and a footer. All old placeholder data is gone.
+  - App.css — added .menu-grid, .menu-card, and related styles. The card shows
+  the dish photo (180px tall), a category pill, name, description, and price.
+
+  Each card uses item.price.toFixed(2) so prices display cleanly as $12.99
+  instead of raw numbers.
+
+  Ready for Step 2 (extracting MenuCard and MenuGrid components) whenever you
+  are.
+
+✻ Baked for 59s
+
+⏺ Background command "Start Vite dev server in background" completed (exit code
+0)
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ The dev server started cleanly with no errors. Your app is live at
+  http://localhost:5173 — open it in your browser to see all 10 menu cards
+  rendering.
+
+❯ Now help me refactor the menu display into components.                        
+                                                                                
+Please create:                                                                  
+- src/components/MenuCard.jsx                                                   
+- src/components/MenuGrid.jsx                                                   
+                                                                                
+Requirements:                                                                   
+- MenuCard should display one dish card (image, name, category, price,          
+description)                                                                    
+- MenuGrid should render a grid of MenuCard components                          
+- App.jsx should remain simple and mainly pass menuItems into MenuGrid          
+- keep the code beginner-friendly and easy to extend later                      
+
+⏺ Bash(mkdir -p /Users/tinawang/midterm-project/src/components)
+  ⎿  Done
+
+⏺ Write(src/components/MenuCard.jsx)
+  ⎿  Wrote 13 lines to src/components/MenuCard.jsx
+       1 export default function MenuCard({ item }) {
+       2   return (
+       3     <div className="menu-card">
+       4       <img src={item.image} alt={item.name} className="menu-card
+         -img" />
+       5       <div className="menu-card-body">
+       6         <span className="menu-card-category">{item.category}</sp
+         an>
+       7         <h3 className="menu-card-name">{item.name}</h3>
+       8         <p className="menu-card-description">{item.description}<
+         /p>
+       9         <p className="menu-card-price">${item.price.toFixed(2)}<
+         /p>
+      10       </div>
+     … +3 lines (ctrl+o to expand)
+
+⏺ Write(src/components/MenuGrid.jsx)
+  ⎿  Wrote 11 lines to src/components/MenuGrid.jsx
+       1 import MenuCard from './MenuCard'
+       2 
+       3 export default function MenuGrid({ items }) {
+       4   return (
+       5     <div className="menu-grid">
+       6       {items.map((item) => (
+       7         <MenuCard key={item.id} item={item} />
+       8       ))}
+       9     </div>
+      10   )
+     … +1 line (ctrl+o to expand)
+
+⏺ Now update App.jsx to use the new components:
+
+⏺ Update(src/App.jsx)
+  ⎿  Added 2 lines, removed 13 lines
+      1  import './App.css'
+      2  import { menuItems } from './data/menuData'
+      3 +import MenuGrid from './components/MenuGrid'                    
+      4  
+      5  export default function App() {
+      6    return (
+     ...
+      20            <p>{menuItems.length} dishes available</p>
+      21          </div>
+      22  
+      22 -        <div className="menu-grid">                            
+      23 -          {menuItems.map((item) => (                           
+      24 -            <div key={item.id} className="menu-card">          
+      25 -              <img src={item.image} alt={item.name} className="
+         -menu-card-img" />                                              
+      26 -              <div className="menu-card-body">                 
+      27 -                <span className="menu-card-category">{item.cate
+         -gory}</span>                                                   
+      28 -                <h3 className="menu-card-name">{item.name}</h3>
+      29 -                <p className="menu-card-description">{item.desc
+         -ription}</p>                                                   
+      30 -                <p className="menu-card-price">${item.price.toF
+         -ixed(2)}</p>                                                   
+      31 -              </div>                                           
+      32 -            </div>                                             
+      33 -          ))}                                                  
+      34 -        </div>                                                 
+      23 +        <MenuGrid items={menuItems} />                         
+      24        </main>
+      25  
+      26        {/* Footer */}
+
+⏺ Here's the final structure:
+
+  src/
+  ├── data/
+  │   └── menuData.js        # raw data only
+  ├── components/
+  │   ├── MenuCard.jsx        # renders one dish card
+  │   └── MenuGrid.jsx        # maps items → MenuCard
+  └── App.jsx                 # imports data + MenuGrid, nothing else
+
+  How data flows:
+  App.jsx
+    → passes menuItems → MenuGrid
+                            → passes each item → MenuCard
+
+  App.jsx is now just 3 lines of logic — import data, import component, render
+  it. No visual markup lives there anymore. When you add search/filter in Step
+  3, you'll filter menuItems in App.jsx and pass the filtered result to MenuGrid
+   — no changes needed inside the components themselves.
+
+❯ 1                                                                             
+
+⏺ It looks like that might have been an accidental message. Did you mean to type
+   something, or are you ready to move on to Step 3 (category filter)?
+
+❯ yes                                                                           
+
+⏺ Ready to start Step 3 — adding the category filter?
+
+  Here's the plan:
+  - Add a CategoryFilter component with "All" + one button per category
+  - Track activeCategory state in App.jsx
+  - Filter menuItems before passing to MenuGrid
+
+  Want me to go ahead and implement it?
+
+❯ Yes, go ahead and implement it.                                               
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Write(src/components/CategoryFilter.jsx)
+  ⎿  Wrote 15 lines to src/components/CategoryFilter.jsx
+       1 export default function CategoryFilter({ categories, activeCateg
+         ory, onSelect }) {
+       2   return (
+       3     <div className="category-filter">
+       4       {categories.map((category) => (
+       5         <button
+       6           key={category}
+       7           className={`filter-btn ${activeCategory === category ?
+          'filter-btn-active' : ''}`}
+       8           onClick={() => onSelect(category)}
+       9         >
+      10           {category}
+     … +5 lines (ctrl+o to expand)
+
+⏺ Update(src/App.jsx)
+  ⎿  Added 19 lines, removed 2 lines
+       1 +import { useState } from 'react'                               
+       2  import './App.css'
+       3  import { menuItems } from './data/menuData'
+       4  import MenuGrid from './components/MenuGrid'
+       5 +import CategoryFilter from './components/CategoryFilter'       
+       6  
+       7 +const categories = ['All', ...new Set(menuItems.map((item) => i
+         +tem.category))]                                                
+       8 +                                                               
+       9  export default function App() {
+      10 +  const [activeCategory, setActiveCategory] = useState('All')  
+      11 +                                                               
+      12 +  const filteredItems =                                        
+      13 +    activeCategory === 'All'                                   
+      14 +      ? menuItems                                              
+      15 +      : menuItems.filter((item) => item.category === activeCate
+         +gory)                                                          
+      16 +                                                               
+      17    return (
+      18      <div className="app">
+      19        {/* Navbar */}
+     ...
+      28        <main className="section">
+      29          <div className="section-header">
+      30            <h2>Browse the Menu</h2>
+      20 -          <p>{menuItems.length} dishes available</p>           
+      31 +          <p>{filteredItems.length} dishes available</p>       
+      32          </div>
+      33  
+      23 -        <MenuGrid items={menuItems} />                         
+      34 +        <CategoryFilter                                        
+      35 +          categories={categories}                              
+      36 +          activeCategory={activeCategory}                      
+      37 +          onSelect={setActiveCategory}                         
+      38 +        />                                                     
+      39 +                                                               
+      40 +        <MenuGrid items={filteredItems} />                     
+      41        </main>
+      42  
+      43        {/* Footer */}
+
+⏺ Now add the styles:
+
+⏺ Update(src/App.css)
+  ⎿  Added 38 lines
+      487    color: #555;
+      488  }
+      489  
+      490 +/* ── Category filter ── */                                   
+      491 +.category-filter {                                            
+      492 +  display: flex;                                              
+      493 +  flex-wrap: wrap;                                            
+      494 +  gap: 0.6rem;                                                
+      495 +  margin-bottom: 2rem;                                        
+      496 +}                                                             
+      497 +                                                              
+      498 +.filter-btn {                                                 
+      499 +  background: #f5f5f5;                                        
+      500 +  color: #555;                                                
+      501 +  border: 1px solid #e0e0e0;                                  
+      502 +  padding: 0.45rem 1.1rem;                                    
+      503 +  border-radius: 999px;                                       
+      504 +  font-size: 0.9rem;                                          
+      505 +  font-weight: 500;                                           
+      506 +  cursor: pointer;                                            
+      507 +  transition: background 0.15s, color 0.15s, border-color 0.15
+          +s;                                                            
+      508 +}                                                             
+      509 +                                                              
+      510 +.filter-btn:hover {                                           
+      511 +  background: #fff0e8;                                        
+      512 +  color: #ff6b35;                                             
+      513 +  border-color: #ffd4bb;                                      
+      514 +}                                                             
+      515 +                                                              
+      516 +.filter-btn-active {                                          
+      517 +  background: #ff6b35;                                        
+      518 +  color: #fff;                                                
+      519 +  border-color: #ff6b35;                                      
+      520 +}                                                             
+      521 +                                                              
+      522 +.filter-btn-active:hover {                                    
+      523 +  background: #e85d2a;                                        
+      524 +  color: #fff;                                                
+      525 +  border-color: #e85d2a;                                      
+      526 +}                                                             
+      527 +                                                              
+      528  /* ── Menu grid ── */
+      529  .menu-grid {
+      530    display: grid;
+
+⏺ Done. Here's what was added:
+
+  CategoryFilter.jsx — receives categories, activeCategory, and onSelect as
+  props. Renders one button per category, highlighting the active one.
+
+  App.jsx changes:
+  - categories is derived once from menuItems using Set to deduplicate: ['All', 
+  'Pizza', 'Sushi', 'Fast Food', 'Salad', 'Mexican']
+  - activeCategory state starts at 'All'
+  - filteredItems is computed from the active category before being passed to
+  MenuGrid
+  - The dish count (X dishes available) updates as you filter
+
+  The filter buttons will appear above the grid. Click any category to narrow
+  the list, click "All" to reset. Ready for Step 4 (search) whenever you are.
+
+❯ accept                                                                        
+
+⏺ Ready for Step 4 — adding the search bar? It'll filter dishes by name and work
+   together with the category filter at the same time.
+
+❯ Ready to start Step 3 — adding the category filter?                           
+                                                                                
+                                                                                
+  Here's the plan:                                                              
+                                                                                
+  - Add a CategoryFilter component with "All" + one button per category         
+  - Track activeCategory state in App.jsx                                       
+                                                                                
+  - Filter menuItems before passing to MenuGrid                                 
+                                                                                
+  Want me to go ahead and implement it?                                         
+                                                                                
+❯ Yes, go ahead and implement it.                                               
+
+⏺ Step 3 is already done — CategoryFilter is built and working. You're now on
+  Step 4.
+
+  Shall I go ahead and implement the search bar?
+
+❯ yes                                                                           
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Write(src/components/SearchBar.jsx)
+  ⎿  Wrote 13 lines to src/components/SearchBar.jsx
+       1 export default function SearchBar({ searchQuery, onSearch }) {
+       2   return (
+       3     <div className="search-bar">
+       4       <input
+       5         type="text"
+       6         placeholder="Search dishes..."
+       7         value={searchQuery}
+       8         onChange={(e) => onSearch(e.target.value)}
+       9         className="search-input"
+      10       />
+     … +3 lines (ctrl+o to expand)
+
+⏺ Update(src/App.jsx)
+  ⎿  Added 9 lines, removed 4 lines
+       3  import { menuItems } from './data/menuData'
+       4  import MenuGrid from './components/MenuGrid'
+       5  import CategoryFilter from './components/CategoryFilter'
+       6 +import SearchBar from './components/SearchBar'                 
+       7  
+       8  const categories = ['All', ...new Set(menuItems.map((item) => i
+          tem.category))]
+       9  
+      10  export default function App() {
+      11    const [activeCategory, setActiveCategory] = useState('All')
+      12 +  const [searchQuery, setSearchQuery] = useState('')           
+      13  
+      12 -  const filteredItems =                                        
+      13 -    activeCategory === 'All'                                   
+      14 -      ? menuItems                                              
+      15 -      : menuItems.filter((item) => item.category === activeCate
+         -gory)                                                          
+      14 +  const filteredItems = menuItems.filter((item) => {           
+      15 +    const matchesCategory = activeCategory === 'All' || item.ca
+         +tegory === activeCategory                                      
+      16 +    const matchesSearch = item.name.toLowerCase().includes(sear
+         +chQuery.toLowerCase())                                         
+      17 +    return matchesCategory && matchesSearch                    
+      18 +  })                                                           
+      19  
+      20    return (
+      21      <div className="app">
+     ...
+      34            <p>{filteredItems.length} dishes available</p>
+      35          </div>
+      36  
+      37 +        <SearchBar searchQuery={searchQuery} onSearch={setSearc
+         +hQuery} />                                                     
+      38 +                                                               
+      39          <CategoryFilter
+      40            categories={categories}
+      41            activeCategory={activeCategory}
+
+⏺ Now add the search styles:
+
+⏺ Update(src/App.css)
+  ⎿  Added 22 lines
+      487    color: #555;
+      488  }
+      489  
+      490 +/* ── Search bar ── */                                        
+      491 +.search-bar {                                                 
+      492 +  margin-bottom: 1.25rem;                                     
+      493 +}                                                             
+      494 +                                                              
+      495 +.search-input {                                               
+      496 +  width: 100%;                                                
+      497 +  max-width: 420px;                                           
+      498 +  padding: 0.65rem 1rem;                                      
+      499 +  border: 1px solid #e0e0e0;                                  
+      500 +  border-radius: 10px;                                        
+      501 +  font-size: 0.95rem;                                         
+      502 +  color: #1a1a2e;                                             
+      503 +  outline: none;                                              
+      504 +  transition: border-color 0.2s, box-shadow 0.2s;             
+      505 +}                                                             
+      506 +                                                              
+      507 +.search-input:focus {                                         
+      508 +  border-color: #ff6b35;                                      
+      509 +  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12);             
+      510 +}                                                             
+      511 +                                                              
+      512  /* ── Category filter ── */
+      513  .category-filter {
+      514    display: flex;
+
+⏺ Done. Here's what was added:
+
+  SearchBar.jsx — a controlled input that calls onSearch on every keystroke.
+
+  App.jsx changes:
+  - Added searchQuery state (starts as '')
+  - Merged both filters into one: a single .filter() that checks matchesCategory
+   AND matchesSearch together
+  - The dish count updates in real time as you type or switch categories
+
+  Search and category filter work independently and together — e.g. searching
+  "pizza" while "Fast Food" is active returns 0 results, as expected.
+
+  Ready for Step 5 — saving favorite dishes with localStorage?
+
+❯ yes                                                                           
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ Update(src/components/MenuCard.jsx)
+  ⎿  Added 11 lines, removed 2 lines
+      1 -export default function MenuCard({ item }) {                    
+      1 +export default function MenuCard({ item, isFavorite, onToggleFav
+        +orite }) {                                                      
+      2    return (
+      3      <div className="menu-card">
+      4        <img src={item.image} alt={item.name} className="menu-card
+         -img" />
+     ...
+       6          <span className="menu-card-category">{item.category}</s
+          pan>
+       7          <h3 className="menu-card-name">{item.name}</h3>
+       8          <p className="menu-card-description">{item.description}
+          </p>
+       9 -        <p className="menu-card-price">${item.price.toFixed(2)}
+         -</p>                                                           
+       9 +        <div className="menu-card-footer">                     
+      10 +          <p className="menu-card-price">${item.price.toFixed(2
+         +)}</p>                                                         
+      11 +          <button                                              
+      12 +            className={`favorite-btn ${isFavorite ? 'favorite-b
+         +tn-active' : ''}`}                                             
+      13 +            onClick={() => onToggleFavorite(item.id)}          
+      14 +            aria-label={isFavorite ? 'Remove from favorites' : 
+         +'Add to favorites'}                                            
+      15 +          >                                                    
+      16 +            ♥                                                  
+      17 +          </button>                                            
+      18 +        </div>                                                 
+      19        </div>
+      20      </div>
+      21    )
+
+⏺ Now update MenuGrid to pass the favorites props down to each card:
+
+⏺ Update(src/components/MenuGrid.jsx)
+  ⎿  Added 7 lines, removed 2 lines
+       1  import MenuCard from './MenuCard'
+       2  
+       3 -export default function MenuGrid({ items }) {                  
+       3 +export default function MenuGrid({ items, favorites, onToggleFa
+         +vorite }) {                                                    
+       4    return (
+       5      <div className="menu-grid">
+       6        {items.map((item) => (
+       7 -        <MenuCard key={item.id} item={item} />                 
+       7 +        <MenuCard                                              
+       8 +          key={item.id}                                        
+       9 +          item={item}                                          
+      10 +          isFavorite={favorites.includes(item.id)}             
+      11 +          onToggleFavorite={onToggleFavorite}                  
+      12 +        />                                                     
+      13        ))}
+      14      </div>
+      15    )
+
+⏺ Now create the FavoritesPanel:
+
+⏺ Write(src/components/FavoritesPanel.jsx)
+  ⎿  Wrote 38 lines to src/components/FavoritesPanel.jsx
+       1 import { menuItems } from '../data/menuData'
+       2 
+       3 export default function FavoritesPanel({ favorites, onToggleFavo
+         rite }) {
+       4   const favoriteDishes = menuItems.filter((item) => favorites.in
+         cludes(item.id))
+       5 
+       6   if (favoriteDishes.length === 0) {
+       7     return (
+       8       <div className="favorites-panel">
+       9         <h2 className="favorites-title">My Favorites</h2>
+      10         <p className="favorites-empty">No favorites yet. Click ♥
+          on a dish to save it!</p>
+     … +28 lines (ctrl+o to expand)
+
+⏺ Now wire everything together in App.jsx:
+
+⏺ Update(src/App.jsx)
+  ⎿  Added 21 lines, removed 1 line
+       4  import MenuGrid from './components/MenuGrid'
+       5  import CategoryFilter from './components/CategoryFilter'
+       6  import SearchBar from './components/SearchBar'
+       7 +import FavoritesPanel from './components/FavoritesPanel'       
+       8  
+       9  const categories = ['All', ...new Set(menuItems.map((item) => i
+          tem.category))]
+      10  
+      11  export default function App() {
+      12    const [activeCategory, setActiveCategory] = useState('All')
+      13    const [searchQuery, setSearchQuery] = useState('')
+      14 +  const [favorites, setFavorites] = useState(                  
+      15 +    () => JSON.parse(localStorage.getItem('favorites')) || []  
+      16 +  )                                                            
+      17  
+      18 +  function toggleFavorite(id) {                                
+      19 +    setFavorites((prev) => {                                   
+      20 +      const updated = prev.includes(id)                        
+      21 +        ? prev.filter((favId) => favId !== id)                 
+      22 +        : [...prev, id]                                        
+      23 +      localStorage.setItem('favorites', JSON.stringify(updated)
+         +)                                                              
+      24 +      return updated                                           
+      25 +    })                                                         
+      26 +  }                                                            
+      27 +                                                               
+      28    const filteredItems = menuItems.filter((item) => {
+      29      const matchesCategory = activeCategory === 'All' || item.ca
+          tegory === activeCategory
+      30      const matchesSearch = item.name.toLowerCase().includes(sear
+          chQuery.toLowerCase())
+     ...
+      56            onSelect={setActiveCategory}
+      57          />
+      58  
+      45 -        <MenuGrid items={filteredItems} />                     
+      59 +        <MenuGrid                                              
+      60 +          items={filteredItems}                                
+      61 +          favorites={favorites}                                
+      62 +          onToggleFavorite={toggleFavorite}                    
+      63 +        />                                                     
+      64        </main>
+      65  
+      66 +      <FavoritesPanel favorites={favorites} onToggleFavorite={t
+         +oggleFavorite} />                                              
+      67 +                                                               
+      68        {/* Footer */}
+      69        <footer className="footer">
+      70          <div className="footer-logo">
+
+⏺ Finally, add the CSS:
+
+⏺ Update(src/App.css)
+  ⎿  Added 105 lines
+      547    border-color: #e85d2a;
+      548  }
+      549  
+      550 +/* ── Favorites panel ── */                                   
+      551 +.favorites-panel {                                            
+      552 +  max-width: 1100px;                                          
+      553 +  margin: 0 auto;                                             
+      554 +  padding: 2rem 2rem 0;                                       
+      555 +}                                                             
+      556 +                                                              
+      557 +.favorites-title {                                            
+      558 +  font-size: 1.3rem;                                          
+      559 +  font-weight: 700;                                           
+      560 +  color: #1a1a2e;                                             
+      561 +  margin-bottom: 1rem;                                        
+      562 +}                                                             
+      563 +                                                              
+      564 +.favorites-empty {                                            
+      565 +  color: #888;                                                
+      566 +  font-size: 0.95rem;                                         
+      567 +}                                                             
+      568 +                                                              
+      569 +.favorites-list {                                             
+      570 +  list-style: none;                                           
+      571 +  display: flex;                                              
+      572 +  flex-direction: column;                                     
+      573 +  gap: 0.75rem;                                               
+      574 +}                                                             
+      575 +                                                              
+      576 +.favorites-item {                                             
+      577 +  display: flex;                                              
+      578 +  align-items: center;                                        
+      579 +  gap: 1rem;                                                  
+      580 +  background: #fff;                                           
+      581 +  border: 1px solid #f0f0f0;                                  
+      582 +  border-radius: 12px;                                        
+      583 +  padding: 0.75rem 1rem;                                      
+      584 +}                                                             
+      585 +                                                              
+      586 +.favorites-item-img {                                         
+      587 +  width: 52px;                                                
+      588 +  height: 52px;                                               
+      589 +  object-fit: cover;                                          
+      590 +  border-radius: 8px;                                         
+      591 +  flex-shrink: 0;                                             
+      592 +}                                                             
+      593 +                                                              
+      594 +.favorites-item-info {                                        
+      595 +  flex: 1;                                                    
+      596 +  display: flex;                                              
+      597 +  flex-direction: column;                                     
+      598 +  gap: 0.2rem;                                                
+      599 +}                                                             
+      600 +                                                              
+      601 +.favorites-item-name {                                        
+      602 +  font-size: 0.95rem;                                         
+      603 +  font-weight: 600;                                           
+      604 +  color: #1a1a2e;                                             
+      605 +}                                                             
+      606 +                                                              
+      607 +.favorites-item-price {                                       
+      608 +  font-size: 0.88rem;                                         
+      609 +  color: #ff6b35;                                             
+      610 +  font-weight: 600;                                           
+      611 +}                                                             
+      612 +                                                              
+      613 +.favorites-remove-btn {                                       
+      614 +  background: none;                                           
+      615 +  border: none;                                               
+      616 +  color: #bbb;                                                
+      617 +  font-size: 0.9rem;                                          
+      618 +  cursor: pointer;                                            
+      619 +  padding: 0.25rem 0.5rem;                                    
+      620 +  border-radius: 6px;                                         
+      621 +  transition: color 0.15s, background 0.15s;                  
+      622 +}                                                             
+      623 +                                                              
+      624 +.favorites-remove-btn:hover {                                 
+      625 +  color: #ff6b35;                                             
+      626 +  background: #fff0e8;                                        
+      627 +}                                                             
+      628 +                                                              
+      629 +/* ── Favorite button on card ── */                           
+      630 +.menu-card-footer {                                           
+      631 +  display: flex;                                              
+      632 +  justify-content: space-between;                             
+      633 +  align-items: center;                                        
+      634 +}                                                             
+      635 +                                                              
+      636 +.favorite-btn {                                               
+      637 +  background: none;                                           
+      638 +  border: none;                                               
+      639 +  font-size: 1.2rem;                                          
+      640 +  color: #ddd;                                                
+      641 +  cursor: pointer;                                            
+      642 +  transition: color 0.15s, transform 0.15s;                   
+      643 +  line-height: 1;                                             
+      644 +}                                                             
+      645 +                                                              
+      646 +.favorite-btn:hover {                                         
+      647 +  color: #ff6b35;                                             
+      648 +  transform: scale(1.2);                                      
+      649 +}                                                             
+      650 +                                                              
+      651 +.favorite-btn-active {                                        
+      652 +  color: #ff6b35;                                             
+      653 +}                                                             
+      654 +                                                              
+      655  /* ── Menu grid ── */
+      656  .menu-grid {
+      657    display: grid;
+
+⏺ Done. Here's what was added:
+
+  MenuCard — heart button (♥) in the card footer. Gray by default, orange when
+  favorited.
+
+  MenuGrid — passes isFavorite and onToggleFavorite down to each card.
+
+  FavoritesPanel — appears below the menu grid. Shows a list of saved dishes
+  with thumbnail, name, price, and a remove button. Shows an empty state message
+   if nothing is saved yet.
+
+  App.jsx — favorites state initializes from localStorage on first load.
+  toggleFavorite adds/removes an ID and syncs to localStorage every time, so
+  favorites survive a page refresh.
+
+  All 5 features are now complete. Ready for Step 6 — responsive mobile layout
+  polish?
+
+✻ Cogitated for 56s
+
+❯ accept                                                                        
+
+⏺ Ready for Step 6 — responsive mobile layout polish. Shall I go ahead?
+
+❯ Yes                                                                           
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ The existing responsive block only covers the old landing page. I'll replace
+  it with rules that target the actual current components.
+
+⏺ Update(src/App.css)
+  ⎿  Added 38 lines, removed 7 lines
+      717  
+      718  /* ── Responsive ── */
+      719  @media (max-width: 640px) {
+      720 -  .nav-links {                                                
+      720 +  /* Section padding */                                       
+      721 +  .section {                                                  
+      722 +    padding: 2rem 1rem;                                       
+      723 +  }                                                           
+      724 +                                                              
+      725 +  /* Search bar fills full width */                           
+      726 +  .search-input {                                             
+      727 +    max-width: 100%;                                          
+      728 +  }                                                           
+      729 +                                                              
+      730 +  /* Category filter scrolls horizontally instead of wrapping 
+          +*/                                                            
+      731 +  .category-filter {                                          
+      732 +    flex-wrap: nowrap;                                        
+      733 +    overflow-x: auto;                                         
+      734 +    padding-bottom: 0.5rem;                                   
+      735 +    -webkit-overflow-scrolling: touch;                        
+      736 +    scrollbar-width: none;                                    
+      737 +  }                                                           
+      738 +                                                              
+      739 +  .category-filter::-webkit-scrollbar {                       
+      740      display: none;
+      741    }
+      742  
+      724 -  .hero {                                                     
+      725 -    padding: 3.5rem 1.25rem 3rem;                             
+      743 +  .filter-btn {                                               
+      744 +    flex-shrink: 0;                                           
+      745    }
+      746  
+      728 -  .section {                                                  
+      729 -    padding: 3.5rem 1.25rem;                                  
+      747 +  /* Single column card grid on small screens */              
+      748 +  .menu-grid {                                                
+      749 +    grid-template-columns: 1fr;                               
+      750    }
+      751  
+      732 -  .section-alt {                                              
+      733 -    padding: 3.5rem 1.25rem;                                  
+      752 +  /* Shorter card image on mobile */                          
+      753 +  .menu-card-img {                                            
+      754 +    height: 160px;                                            
+      755    }
+      756 +                                                              
+      757 +  /* Favorites panel padding */                               
+      758 +  .favorites-panel {                                          
+      759 +    padding: 1.5rem 1rem 0;                                   
+      760 +  }                                                           
+      761 +                                                              
+      762 +  /* Footer */                                                
+      763 +  .footer {                                                   
+      764 +    padding: 2rem 1rem;                                       
+      765 +  }                                                           
+      766  }
+
+⏺ Done. Here's what the mobile layout now does on screens ≤ 640px:
+
+  ┌────────────────┬────────────────────────────────────────────────────────┐
+  │    Element     │                    Mobile behavior                     │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Section        │ Reduced to 2rem 1rem so content doesn't feel cramped   │
+  │ padding        │                                                        │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Search input   │ Stretches full width                                   │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Category       │ Scrolls horizontally instead of wrapping to multiple   │
+  │ filter         │ rows                                                   │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Menu grid      │ Single column — cards are full width and easy to tap   │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Card images    │ Slightly shorter (160px) to show more content above    │
+  │                │ the fold                                               │
+  ├────────────────┼────────────────────────────────────────────────────────┤
+  │ Favorites      │ Tighter side padding to match the section              │
+  │ panel          │                                                        │
+  └────────────────┴────────────────────────────────────────────────────────┘
+
+  To test it: open DevTools in your browser → toggle device toolbar → pick a
+  phone size like iPhone SE or 375px wide.
+
+  All 6 steps are now complete! Here's a summary of everything built:
+
+  src/
+  ├── data/menuData.js          ✅ 10 sample dishes
+  ├── components/
+  │   ├── MenuCard.jsx          ✅ dish card with favorite button
+  │   ├── MenuGrid.jsx          ✅ responsive card grid
+  │   ├── CategoryFilter.jsx    ✅ category pill buttons
+  │   ├── SearchBar.jsx         ✅ live search input
+  │   └── FavoritesPanel.jsx    ✅ saved dishes with localStorage
+  └── App.jsx                   ✅ wires everything together
+
+❯ I want to improve the UI layout of QuickBite.                                 
+                                                                                
+Right now the page feels too left-aligned. I want a more balanced and centered  
+layout while still keeping it responsive on mobile.                             
+
+⏺ Let me see the current layout in context:
+
+⏺ Read 1 file (ctrl+o to expand)
+
+⏺ The issue is that .section uses max-width: 1100px; margin: 0 auto but the
+  search bar and category filter are left-aligned inside it. I'll center the
+  section header, make the search bar full-width within the content column, and
+  add a proper centered page wrapper so everything feels balanced.
+
+⏺ Update(src/App.css)
+  ⎿  Added 5 lines, removed 17 lines
+      210  
+      211  /* ── Sections ── */
+      212  .section {
+      213 -  padding: 5rem 2rem;                                         
+      213 +  padding: 3rem 2rem 4rem;                                    
+      214    max-width: 1100px;
+      215    margin: 0 auto;
+      216  }
+      217  
+      218 -.section-alt {                                                
+      219 -  max-width: 100%;                                            
+      220 -  background: #fafafa;                                        
+      221 -  padding: 5rem 2rem;                                         
+      222 -}                                                             
+      223 -                                                              
+      224 -.section-alt > * {                                            
+      225 -  max-width: 1100px;                                          
+      226 -  margin-left: auto;                                          
+      227 -  margin-right: auto;                                         
+      228 -}                                                             
+      229 -                                                              
+      218  .section-header {
+      219    text-align: center;
+      232 -  margin-bottom: 3rem;                                        
+      220 +  margin-bottom: 2rem;                                        
+      221  }
+      222  
+      223  .section-header h2 {
+      224    font-size: clamp(1.6rem, 3vw, 2.2rem);
+      225    font-weight: 800;
+      226    color: #1a1a2e;
+      239 -  margin-bottom: 0.5rem;                                      
+      227 +  margin-bottom: 0.4rem;                                      
+      228  }
+      229  
+      230  .section-header p {
+      243 -  color: #666;                                                
+      244 -  font-size: 1rem;                                            
+      231 +  color: #888;                                                
+      232 +  font-size: 0.95rem;                                         
+      233  }
+      234  
+      235  /* ── Features grid ── */
+
+⏺ Now center the search bar and update the category filter to also center:
+
+⏺ Update(src/App.css)
+  ⎿  Added 4 lines, removed 2 lines
+      477  
+      478  /* ── Search bar ── */
+      479  .search-bar {
+      480 +  display: flex;                                              
+      481 +  justify-content: center;                                    
+      482    margin-bottom: 1.25rem;
+      483  }
+      484  
+      485  .search-input {
+      486    width: 100%;
+      485 -  max-width: 420px;                                           
+      486 -  padding: 0.65rem 1rem;                                      
+      487 +  max-width: 480px;                                           
+      488 +  padding: 0.7rem 1.1rem;                                     
+      489    border: 1px solid #e0e0e0;
+      490    border-radius: 10px;
+      491    font-size: 0.95rem;
+
+⏺ Update(src/App.css)
+  ⎿  Added 1 line
+      503  .category-filter {
+      504    display: flex;
+      505    flex-wrap: wrap;
+      506 +  justify-content: center;                                    
+      507    gap: 0.6rem;
+      508    margin-bottom: 2rem;
+      509  }
+
+⏺ Also update the mobile rule so the centered search bar stays full-width on
+  small screens:
+
+⏺ Update(src/App.css)
+  ⎿  Added 5 lines
+      714    }
+      715  
+      716    /* Search bar fills full width */
+      717 +  .search-bar {                                               
+      718 +    display: block;                                           
+      719 +  }                                                           
+      720 +                                                              
+      721    .search-input {
+      722      max-width: 100%;
+      723    }
+      724  
+      725    /* Category filter scrolls horizontally instead of wrapping 
+           */
+      726    .category-filter {
+      727 +    justify-content: flex-start;                              
+      728      flex-wrap: nowrap;
+      729      overflow-x: auto;
+      730      padding-bottom: 0.5rem;
+
+⏺ Here's what changed and why:
+
+  ┌───────────────────────────────┬─────────────────────────────────────────┐
+  │            Before             │                  After                  │
+  ├───────────────────────────────┼─────────────────────────────────────────┤
+  │ Search bar left-aligned       │ Centered with justify-content: center   │
+  │                               │ on the wrapper                          │
+  ├───────────────────────────────┼─────────────────────────────────────────┤
+  │ Category pills left-aligned   │ Centered with justify-content: center   │
+  ├───────────────────────────────┼─────────────────────────────────────────┤
+  │ Section had excessive top     │ Reduced to 3rem so it sits higher on    │
+  │ padding (5rem)                │ the page                                │
+  ├───────────────────────────────┼─────────────────────────────────────────┤
+  │ Section header subtitle was   │ Lightened to #888 for better visual     │
+  │ dark                          │ hierarchy                               │
+  └───────────────────────────────┴─────────────────────────────────────────┘
+
+  On mobile (≤640px), the search bar reverts to display: block (full width) and
+  the category filter switches back to left-aligned horizontal scroll — so the
+  centered layout doesn't break on small screens.
+
+✻ Sautéed for 39s
